@@ -29,9 +29,9 @@ public class FirebaseService {
         String id = UUID.randomUUID().toString();
         ArrayList<Student> arrayList = new ArrayList<>();
         CollectionReference collectionReference = db.collection("Student");
-        Map<String, Student> data = new HashMap<>();
-        data.put(id,student);
-        collectionReference.add(data);
+        //Map<String, Student> data = new HashMap<>();
+        //data.put(id,student);
+        collectionReference.add(student);
         return true;
     }
 
@@ -48,17 +48,37 @@ public class FirebaseService {
         }
     }
 
-    public List<Student> showOnlyStudent() throws ExecutionException, InterruptedException {
-        List<Student> student = new ArrayList<>();
-        Iterable<DocumentReference> documentReference = db.collection("Student").listDocuments();
-        for(DocumentReference documentReference1 : documentReference){
-            ApiFuture<DocumentSnapshot> future = documentReference1.get();
-            DocumentSnapshot document = future.get();
-            if (document.exists()) {
-                student.add(document.toObject(Student.class));
+    public Student showOnlyStudent(String id) throws ExecutionException, InterruptedException {
+        Iterable<DocumentReference> iterable = db.collection("Student").listDocuments();
+        for(DocumentReference docReference : iterable){
+            if(docReference.get().get().toObject(Student.class).getId().equals(id)){
+                return docReference.get().get().toObject(Student.class);
             }
         }
-        return student;
+        return null;
+
+    }
+
+    public boolean deleteStudent(String id) throws ExecutionException, InterruptedException {
+        Iterable<DocumentReference> iterable = db.collection("Student").listDocuments();
+        for (DocumentReference docReference : iterable) {
+            if (docReference.get().get().toObject(Student.class).getId().equals(id)) {
+                docReference.delete();
+                return  true;
+            }
+        }
+        return false;
+    }
+
+    public boolean updateStudent(String id,Student student) throws ExecutionException, InterruptedException {
+        Iterable<DocumentReference> iterable = db.collection("Student").listDocuments();
+        for (DocumentReference docReference : iterable) {
+            if (docReference.get().get().toObject(Student.class).getId().equals(id)) {
+                docReference.set(student);
+                return  true;
+            }
+        }
+        return false;
     }
 
     private void initDB() throws IOException {
